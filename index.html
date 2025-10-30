@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+¡Por supuesto! Aquí tienes el contenido completo del archivo index.html modificado.He reemplazado la función calcularPuntos() para que distinga entre un delantero de Jersey (que es una pieza completa y usa $\frac{\text{Ancho Total}}{2}$) y un delantero de Chaqueta (que es una mitad de la espalda y usa $\frac{\text{Ancho Total}}{4}$), justo como lo necesitas para Rincón de Labores.Simplemente sustituye el archivo index.html actual con el siguiente código.HTML<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -306,10 +306,17 @@
                     largoRecomendado = datosTalla[1]; // Largo del Cuerpo
                     break;
                 case 'delantero':
-                    // CÁLCULO DE DELANTERO (Pieza de Chaqueta o Jersey): Ancho Total del Cuerpo / 2.
-                    // ESTE ES EL CÁLCULO DE LA MITAD SOLICITADO.
-                    cmDeseados = datosTalla[0] / 2; 
                     largoRecomendado = datosTalla[1]; // Largo del Cuerpo
+
+                    if (tipoProyecto === 'chaqueta') {
+                        // DELANTERO DE CHAQUETA (un lado): Es la mitad de la espalda.
+                        // Ancho Total del Cuerpo / 4.
+                        cmDeseados = datosTalla[0] / 4; 
+                    } else { 
+                        // DELANTERO DE JERSEY (pieza completa): Igual que la espalda.
+                        // Ancho Total del Cuerpo / 2.
+                        cmDeseados = datosTalla[0] / 2; 
+                    }
                     break;
                 case 'manga':
                     // CÁLCULO DE MANGA: Circunferencia de Puño
@@ -357,7 +364,6 @@
 
         } else {
             notaLargo.style.display = 'none';
-            avisoTapeta.style.display = 'none';
         }
 
         document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
