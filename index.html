@@ -255,6 +255,7 @@
     }
     
     document.addEventListener('DOMContentLoaded', () => {
+        // Establecer el estado inicial correcto
         handleTipoProyectoChange(); 
     });
 
@@ -271,6 +272,7 @@
         let nombreTalla = '';
         let piezaTejida = '';
 
+        // 1. Validar la muestra de tensión
         if (isNaN(puntos10cm) || puntos10cm <= 0) {
             alert("Por favor, introduce un número de puntos válido para 10 cm.");
             return;
@@ -278,6 +280,7 @@
 
         const ratioPuntoCM = puntos10cm / 10;
         
+        // 2. Determinar los CM a tejer, pieza y largo
         if (tipoProyecto === 'manual') {
             // --- MODO MANUAL ---
             cmDeseados = parseFloat(document.getElementById('cm-deseados').value);
@@ -298,12 +301,19 @@
             // Lógica de cálculo de CM y largo según la pieza
             switch (piezaTejida) {
                 case 'espalda':
-                case 'delantero': // El delantero es la mitad del ancho del cuerpo
+                    // CÁLCULO DE ESPALDA: Ancho Total del Cuerpo / 2
+                    cmDeseados = datosTalla[0] / 2; 
+                    largoRecomendado = datosTalla[1]; // Largo del Cuerpo
+                    break;
+                case 'delantero':
+                    // CÁLCULO DE DELANTERO (Pieza de Chaqueta o Jersey): Ancho Total del Cuerpo / 2.
+                    // ESTE ES EL CÁLCULO DE LA MITAD SOLICITADO.
                     cmDeseados = datosTalla[0] / 2; 
                     largoRecomendado = datosTalla[1]; // Largo del Cuerpo
                     break;
                 case 'manga':
-                    cmDeseados = datosTalla[2]; // Circunferencia de Puño
+                    // CÁLCULO DE MANGA: Circunferencia de Puño
+                    cmDeseados = datosTalla[2]; 
                     largoRecomendado = datosTalla[3]; // Largo de la Manga
                     break;
             }
@@ -344,6 +354,7 @@
             } else {
                  document.getElementById('nota-largo').innerHTML = `📏 Largo recoemndado para  ${NOMBRES[piezaTejida]} en talla ${nombreTalla}desde el hombro al bajo es de ${largoRecomendado} cm.`;
             }
+
         } else {
             notaLargo.style.display = 'none';
             avisoTapeta.style.display = 'none';
