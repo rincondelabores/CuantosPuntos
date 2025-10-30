@@ -1,4 +1,4 @@
-¡Por supuesto! Aquí tienes el contenido completo del archivo index.html modificado.He reemplazado la función calcularPuntos() para que distinga entre un delantero de Jersey (que es una pieza completa y usa $\frac{\text{Ancho Total}}{2}$) y un delantero de Chaqueta (que es una mitad de la espalda y usa $\frac{\text{Ancho Total}}{4}$), justo como lo necesitas para Rincón de Labores.Simplemente sustituye el archivo index.html actual con el siguiente código.HTML<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -351,16 +351,21 @@
         // Nota de Largo (Solo si NO es Manual)
         const notaLargo = document.getElementById('nota-largo');
         if (tipoProyecto !== 'manual') {
-            document.getElementById('talla-final').textContent = nombreTalla;
-            document.getElementById('pieza-final').textContent = NOMBRES[piezaTejida];
-            document.getElementById('largo-recomendado').textContent = largoRecomendado;
             notaLargo.style.display = 'block';
+            let textoNota = '';
 
+            // 🛑 FIX: Se genera el innerHTML completo para asegurar que el valor de largoRecomendado esté fresco.
+            // Se eliminan las líneas que intentaban actualizar los spans ya que eran sobrescritos.
             if (piezaTejida === 'manga') {
-                document.getElementById('nota-largo').innerHTML = `📏 Largo recomendado para la manga de la talla ${nombreTalla}**,desde el puño hasta la sisa es de *${largoRecomendado} cm.`;
+                // Se corrige el texto para una lectura más clara
+                textoNota = `📏 Largo recomendado para la manga de la talla **${nombreTalla}**, desde el puño hasta la sisa es de **${largoRecomendado} cm**.`;
             } else {
-                 document.getElementById('nota-largo').innerHTML = `📏 Largo recoemndado para  ${NOMBRES[piezaTejida]} en talla ${nombreTalla}desde el hombro al bajo es de ${largoRecomendado} cm.`;
+                 // Se corrige el typo "recoemndado" por "recomendado" y se ajusta la redacción.
+                 textoNota = `📏 Largo recomendado para la pieza **${NOMBRES[piezaTejida]}** en talla **${nombreTalla}**, desde el hombro al bajo es de **${largoRecomendado} cm**.`;
             }
+            
+            // Asigna el nuevo texto completo, incluyendo el largo actualizado
+            document.getElementById('nota-largo').innerHTML = textoNota;
 
         } else {
             notaLargo.style.display = 'none';
