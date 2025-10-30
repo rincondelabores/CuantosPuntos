@@ -6,8 +6,7 @@
     <title>Calculadora de Puntos - Rincón de Labores</title>
     <style>
         :root {
-            --color-principal: #5e4485; /* Morado, puedes cambiarlo */
-            --color-secundario: #f0f0f0;
+            --color-principal: #5e4485; /* Morado, Rincón de Labores */
             --color-alerta: #e74c3c;
             --color-exito: #2ecc71;
             --fuente-principal: sans-serif;
@@ -92,7 +91,7 @@
             margin-top: 15px;
             border-radius: 5px;
             font-weight: bold;
-            display: none; /* Oculto por defecto */
+            display: none;
         }
 
         #aviso-tapeta {
@@ -135,22 +134,22 @@
     <div class="input-group">
         <h2>Paso 2: Selección y Medidas</h2>
         
-        <label>¿Qué vas a calcular?</label>
-        <select id="tipo-prenda">
-            <option value="jersey">Jersey (Cerrado)</option>
-            <option value="chaqueta">Chaqueta (Abierta + Tapeta)</option>
-            <option value="manual">Centímetros Manuales (Ancho/Puño)</option>
+        <label>¿Qué vas a tejer?</label>
+        <select id="tipo-proyecto">
+            <option value="jersey">Jersey (Prenda Cerrada)</option>
+            <option value="chaqueta">Chaqueta (Prenda Abierta)</option>
+            <option value="manual">Centímetros Deseados (Medida Manual)</option>
         </select>
         
-        <div id="selector-pieza">
-            <label>Pieza a tejer:</label>
+        <div id="selectores-prenda">
+            
+            <label for="pieza-tejida">Pieza a tejer:</label>
             <select id="pieza-tejida">
-                <option value="cuerpo">Cuerpo (Ancho de Pecho)</option>
-                <option value="manga">Manga (Circunferencia de Puño)</option>
+                <option value="espalda">Espalda</option>
+                <option value="delantero">Delantero</option>
+                <option value="manga">Manga (Empezando por el Puño)</option>
             </select>
-        </div>
 
-        <div id="talla-selector">
             <label for="talla">Selecciona la Talla:</label>
             <select id="talla">
                 <optgroup label="Bebé">
@@ -180,8 +179,8 @@
         </div>
 
         <div id="manual-input" style="display:none;">
-            <label for="cm-deseados">Centímetros de ancho/puño deseados (cm):</label>
-            <input type="number" id="cm-deseados" min="1" placeholder="Ej: 104 (para ancho) o 20 (para puño)">
+            <label for="cm-deseados">Centímetros de ancho deseados (cm):</label>
+            <input type="number" id="cm-deseados" min="1" placeholder="Ej: 104 (ancho total) o 20 (puño)">
         </div>
     </div>
 
@@ -193,11 +192,11 @@
         <h2><span id="puntos-finales"></span> PUNTOS</h2>
         
         <div id="aviso-tapeta" class="aviso">
-            ⚠️ **AVISO IMPORTANTE (Tapeta):** El cálculo es solo para el ancho del cuerpo. Recuerda añadir los **puntos extra** necesarios para la tapeta (el borde de botones/ojales) de tu chaqueta.
+            ⚠️ **AVISO IMPORTANTE (Tapeta):** El cálculo es solo para la pieza. Si es el **delantero de una chaqueta**, recuerda añadir los **puntos extra** necesarios para la tapeta (el borde de botones/ojales).
         </div>
 
         <div id="nota-largo" class="aviso">
-            📏 **Largo Recomendado:** Para la talla **<span id="talla-final"></span>**, el largo recomendado para esta pieza es de **<span id="largo-recomendado"></span> cm**.
+            📏 **Largo Recomendado:** Para la pieza **<span id="pieza-final"></span>** en talla **<span id="talla-final"></span>**, el largo recomendado es de **<span id="largo-recomendado"></span> cm**.
         </div>
     </div>
     
@@ -208,17 +207,17 @@
 
 <script>
     // --- BASE DE DATOS DE TALLAS ---
-    // Valores de ANCHO (Contorno Pecho o Circunferencia de Puño) y LARGO (Largo Total o Largo de Manga) en CM.
+    // Formato: [Ancho_Total_Cuerpo, Largo_Cuerpo, Ancho_Puño, Largo_Manga]
+    // Ancho Delantero/Espalda = Ancho_Total_Cuerpo / 2
     const TALLAS_BD = {
-        // Formato: [Ancho_Cuerpo, Largo_Cuerpo, Ancho_Puño, Largo_Manga]
-        '0m':   [41, 22, 11, 15],  // 0-3m
-        '3m':   [45, 25, 11, 16],  // 3-6m
-        '6m':   [49, 28, 11, 19],  // 6-9m
-        '9m':   [52, 31, 12, 21],  // 9-12m
-        '12m':  [54, 33, 12, 22],  // 1 año
-        '18m':  [55, 34, 12, 23],  // 1.5 años (Aproximación)
-        '24m':  [56, 36, 13, 25],  // 2 años
-        '3a':   [60, 38, 14, 28],  // 3 años
+        '0m':   [41, 22, 11, 15], 
+        '3m':   [45, 25, 11, 16], 
+        '6m':   [49, 28, 11, 19], 
+        '9m':   [52, 31, 12, 21], 
+        '12m':  [54, 33, 12, 22], 
+        '18m':  [55, 34, 12, 23], 
+        '24m':  [56, 36, 13, 25], 
+        '3a':   [60, 38, 14, 28], 
         '4a':   [64, 41, 15, 31],
         '5a':   [67, 44, 16, 34],
         '6a':   [70, 47, 17, 37],
@@ -229,122 +228,3 @@
         'xl':   [118, 68, 22, 63],
         'xxl':  [128, 70, 23, 64],
     };
-
-    // Mapeo para mostrar el nombre de la talla/pieza en el resultado
-    const NOMBRES_TALLAS = {
-        '0m': '0 Meses', '3m': '3 Meses', '6m': '6 Meses', '9m': '9 Meses', '12m': '12 Meses', '18m': '18 Meses', '24m': '24 Meses',
-        '3a': '3 Años', '4a': '4 Años', '5a': '5 Años', '6a': '6 Años',
-        'xs': 'XS', 's': 'S', 'm': 'M', 'l': 'L', 'xl': 'XL', 'xxl': 'XXL',
-        'cuerpo': 'Cuerpo', 'manga': 'Manga (Puño)',
-    };
-    
-    // Función para manejar el cambio en el selector de prenda
-    document.getElementById('tipo-prenda').addEventListener('change', function() {
-        const tipo = this.value;
-        const isManual = (tipo === 'manual');
-        
-        // Ocultar/Mostrar Talla y Pieza (si no es manual)
-        document.getElementById('talla-selector').style.display = isManual ? 'none' : 'block';
-        document.getElementById('selector-pieza').style.display = isManual ? 'none' : 'block';
-        
-        // Mostrar/Ocultar Campo Manual
-        document.getElementById('manual-input').style.display = isManual ? 'block' : 'none';
-    });
-
-    /**
-     * Función principal para realizar el cálculo de puntos.
-     */
-    function calcularPuntos() {
-        const puntos10cm = parseFloat(document.getElementById('puntos10cm').value);
-        const tipoPrenda = document.getElementById('tipo-prenda').value;
-        
-        let cmDeseados = 0;
-        let largoRecomendado = 'N/A'; // N/A si es manual o si no es talla predefinida
-        let nombreTalla = '';
-        let piezaTejida = '';
-
-        // 1. Validar la muestra de tensión
-        if (isNaN(puntos10cm) || puntos10cm <= 0) {
-            alert("Por favor, introduce un número de puntos válido para 10 cm.");
-            return;
-        }
-
-        const ratioPuntoCM = puntos10cm / 10;
-        
-        // 2. Determinar los CM a tejer y otros datos
-        if (tipoPrenda === 'manual') {
-            cmDeseados = parseFloat(document.getElementById('cm-deseados').value);
-            if (isNaN(cmDeseados) || cmDeseados <= 0) {
-                alert("Por favor, introduce los centímetros deseados.");
-                return;
-            }
-            nombreTalla = `${cmDeseados} cm`;
-            piezaTejida = 'Medida Manual';
-        } else {
-            // Modo Talla Predefinida (Jersey o Chaqueta)
-            const talla = document.getElementById('talla').value;
-            piezaTejida = document.getElementById('pieza-tejida').value;
-            const datosTalla = TALLAS_BD[talla];
-            
-            if (!datosTalla) {
-                alert("Por favor, selecciona una talla válida.");
-                return;
-            }
-            
-            nombreTalla = NOMBRES_TALLAS[talla];
-
-            // Elegir entre Ancho de Cuerpo (0) o Ancho de Puño (2)
-            cmDeseados = (piezaTejida === 'cuerpo') ? datosTalla[0] : datosTalla[2];
-            
-            // Elegir entre Largo de Cuerpo (1) o Largo de Manga (3)
-            largoRecomendado = (piezaTejida === 'cuerpo') ? datosTalla[1] : datosTalla[3];
-        }
-
-        // 3. Realizar el Cálculo principal
-        const puntosNecesarios = Math.round(cmDeseados * ratioPuntoCM);
-
-        // 4. Mostrar Resultados
-        document.getElementById('resultado').style.display = 'block';
-        document.getElementById('puntos-finales').textContent = puntosNecesarios;
-        document.getElementById('resultado-muestra').textContent = puntos10cm;
-
-        // Formato de texto para el resultado de CM
-        let textoCm;
-        if (tipoPrenda === 'manual') {
-            textoCm = `${cmDeseados} cm (Medida Manual)`;
-        } else {
-            textoCm = `${cmDeseados} cm (Talla ${nombreTalla}, ${NOMBRES_TALLAS[piezaTejida]})`;
-        }
-        document.getElementById('resultado-cm').textContent = textoCm;
-        
-        // 5. Mostrar Avisos y Notas
-        
-        // Aviso de Tapeta (Solo si es Chaqueta Y Cuerpo)
-        const avisoTapeta = document.getElementById('aviso-tapeta');
-        avisoTapeta.style.display = (tipoPrenda === 'chaqueta' && piezaTejida === 'cuerpo') ? 'block' : 'none';
-
-        // Nota de Largo (Solo si NO es Manual)
-        const notaLargo = document.getElementById('nota-largo');
-        if (tipoPrenda !== 'manual' && largoRecomendado !== 'N/A') {
-            document.getElementById('talla-final').textContent = nombreTalla;
-            document.getElementById('largo-recomendado').textContent = largoRecomendado;
-            notaLargo.style.display = 'block';
-
-            // Ajuste de texto si es la manga
-            if (piezaTejida === 'manga') {
-                notaLargo.innerHTML = `📏 **Largo Recomendado:** Para la talla **${nombreTalla}**, el largo de **manga** recomendado a tejer (desde el puño hasta la sisa) es de **${largoRecomendado} cm**.`;
-            } else {
-                notaLargo.innerHTML = `📏 **Largo Recomendado:** Para la talla **${nombreTalla}**, el largo recomendado para esta pieza es de **${largoRecomendado} cm**.`;
-            }
-
-        } else {
-            notaLargo.style.display = 'none';
-        }
-
-        // Desplazarse al resultado
-        document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
-    }
-</script>
-
-</body>
-</html>
