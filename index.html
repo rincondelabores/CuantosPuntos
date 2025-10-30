@@ -132,9 +132,9 @@
     </div>
 
     <div class="input-group">
-        <h2>Paso 2: Selección y Medidas</h2>
+        <h2>Paso 2: Selección del Proyecto</h2>
         
-        <label>¿Qué vas a tejer?</label>
+        <label>¿Qué vas a calcular?</label>
         <select id="tipo-proyecto">
             <option value="jersey">Jersey (Prenda Cerrada)</option>
             <option value="chaqueta">Chaqueta (Prenda Abierta)</option>
@@ -180,7 +180,7 @@
 
         <div id="manual-input" style="display:none;">
             <label for="cm-deseados">Centímetros de ancho deseados (cm):</label>
-            <input type="number" id="cm-deseados" min="1" placeholder="Ej: 104 (ancho total) o 20 (puño)">
+            <input type="number" id="cm-deseados" min="1" placeholder="Ej: 50">
         </div>
     </div>
 
@@ -208,12 +208,11 @@
 <script>
     // --- BASE DE DATOS DE TALLAS ---
     // Formato: [Ancho_Total_Cuerpo, Largo_Cuerpo, Ancho_Puño, Largo_Manga]
-    // Ancho Delantero/Espalda = Ancho_Total_Cuerpo / 2
     const TALLAS_BD = {
-        '0m':   [41, 22, 11, 11], 
-        '3m':   [45, 25, 11, 13], 
-        '6m':   [49, 28, 11, 15], 
-        '9m':   [52, 31, 12, 18], 
+        '0m':   [41, 22, 11, 15], 
+        '3m':   [45, 25, 11, 16], 
+        '6m':   [49, 28, 11, 19], 
+        '9m':   [52, 31, 12, 21], 
         '12m':  [54, 33, 12, 22], 
         '18m':  [55, 34, 12, 23], 
         '24m':  [56, 36, 13, 25], 
@@ -228,3 +227,128 @@
         'xl':   [118, 68, 22, 63],
         'xxl':  [128, 70, 23, 64],
     };
+
+    // Mapeo para nombres
+    const NOMBRES = {
+        '0m': '0 Meses', '3m': '3 Meses', '6m': '6 Meses', '9m': '9 Meses', '12m': '12 Meses', '18m': '18 Meses', '24m': '24 Meses',
+        '3a': '3 Años', '4a': '4 Años', '5a': '5 Años', '6a': '6 Años',
+        'xs': 'XS', 's': 'S', 'm': 'M', 'l': 'L', 'xl': 'XL', 'xxl': 'XXL',
+        'delantero': 'Delantero', 'espalda': 'Espalda', 'manga': 'Manga',
+    };
+    
+    // Función para manejar el cambio en el selector de proyecto (Control de visibilidad)
+    document.getElementById('tipo-proyecto').addEventListener('change', handleTipoProyectoChange);
+
+    function handleTipoProyectoChange() {
+        const tipo = document.getElementById('tipo-proyecto').value;
+        const selectoresPrendaDiv = document.getElementById('selectores-prenda');
+        const manualInputDiv = document.getElementById('manual-input');
+
+        if (tipo === 'manual') {
+            selectoresPrendaDiv.style.display = 'none';
+            manualInputDiv.style.display = 'block';
+        } else {
+            selectoresPrendaDiv.style.display = 'block';
+            manualInputDiv.style.display = 'none';
+        }
+        // Ocultar resultados al cambiar el modo
+        document.getElementById('resultado').style.display = 'none';
+    }
+    
+    // Inicializar el estado de la interfaz al cargar la página
+    document.addEventListener('DOMContentLoaded', handleTipoProyectoChange);
+
+
+    /**
+     * Función principal para realizar el cálculo de puntos.
+     */
+    function calcularPuntos() {
+        const puntos10cm = parseFloat(document.getElementById('puntos10cm').value);
+        const tipoProyecto = document.getElementById('tipo-proyecto').value;
+        
+        let cmDeseados = 0;
+        let largoRecomendado = 'N/A';
+        let nombreTalla = '';
+        let piezaTejida = '';
+
+        // 1. Validar la muestra de tensión
+        if (isNaN(puntos10cm) || puntos10cm <= 0) {
+            alert("Por favor, introduce un número de puntos válido para 10 cm.");
+            return;
+        }
+
+        const ratioPuntoCM = puntos10cm / 10;
+        
+        // 2. Determinar los CM a tejer, pieza y largo
+        if (tipoProyecto === 'manual') {
+            // --- MODO MANUAL (Solo CM y Puntos) ---
+            cmDeseados = parseFloat(document.getElementById('cm-deseados').value);
+            if (isNaN(cmDeseados) || cmDeseados <= 0) {
+                alert("Por favor, introduce los centímetros deseados.");
+                return;
+            }
+            piezaTejida = 'Centímetros Deseados';
+            
+        } else {
+            // --- MODO PRENDA DEFINIDA (Chaqueta/Jersey) ---
+            const talla = document.getElementById('talla').value;
+            piezaTejida = document.getElementById('pieza-tejida').value;
+            const datosTalla = TALLAS_BD[talla];
+            
+            if (!datosTalla) {
+                alert("Por favor, selecciona una talla válida.");
+                return;
+            }
+            
+            nombreTalla = NOMBRES[talla];
+            
+            // Lógica de cálculo de CM y largo según la pieza
+            switch (piezaTejida) {
+                case 'espalda':
+                case 'delantero':
+                    // Ancho de Delantero/Espalda = Ancho Total del Cuerpo / 2
+                    cmDeseados = datosTalla[0] / 2;
+                    largoRecomendado = datosTalla[1]; // Largo del Cuerpo
+                    break;
+                case 'manga':
+                    // Ancho = Circunferencia de Puño
+                    cmDeseados = datosTalla[2]; 
+                    largoRecomendado = datosTalla[3]; // Largo de la Manga
+                    break;
+            }
+        }
+
+        // 3. Realizar el Cálculo principal
+        const puntosNecesarios = Math.round(cmDeseados * ratioPuntoCM);
+
+        // 4. Mostrar Resultados
+        document.getElementById('resultado').style.display = 'block';
+        document.getElementById('puntos-finales').textContent = puntosNecesarios;
+        document.getElementById('resultado-muestra').textContent = puntos10cm;
+
+        // Formato de texto para el resultado de CM
+        let textoCm;
+        if (tipoProyecto === 'manual') {
+            textoCm = `${cmDeseados} cm`;
+        } else {
+            textoCm = `${cmDeseados} cm (Talla ${nombreTalla}, Pieza: ${NOMBRES[piezaTejida]})`;
+        }
+        document.getElementById('resultado-cm').textContent = textoCm;
+        
+        // 5. Mostrar Avisos y Notas
+        
+        // Aviso de Tapeta (Solo si es Chaqueta Y Delantero)
+        const avisoTapeta = document.getElementById('aviso-tapeta');
+        avisoTapeta.style.display = (tipoProyecto === 'chaqueta' && piezaTejida === 'delantero') ? 'block' : 'none';
+
+        // Nota de Largo (Solo si NO es Manual)
+        const notaLargo = document.getElementById('nota-largo');
+        if (tipoProyecto !== 'manual') {
+            document.getElementById('talla-final').textContent = nombreTalla;
+            document.getElementById('pieza-final').textContent = NOMBRES[piezaTejida];
+            document.getElementById('largo-recomendado').textContent = largoRecomendado;
+            notaLargo.style.display = 'block';
+
+            // Ajuste de texto según la pieza
+            if (piezaTejida === 'manga') {
+                document.getElementById('nota-largo').innerHTML = `📏 **Largo Recomendado:**
