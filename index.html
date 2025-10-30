@@ -350,9 +350,9 @@
 
             // Ajuste de texto según la pieza
             if (piezaTejida === 'manga') {
-                document.getElementById('nota-largo').innerHTML = `📏 **Largo Recomendado:** Para la pieza **Manga** en talla **${nombreTalla}**, el largo recomendado a tejer (desde el puño hasta la sisa) es de **${largoRecomendado} cm**.`;
+                document.getElementById('nota-largo').innerHTML = `📏 El largo recomendado para Manga en talla ${nombreTalla}, el largo recomendado a tejer (desde el puño hasta la sisa) es de ${largoRecomendado} cm.`;
             } else {
-                 document.getElementById('nota-largo').innerHTML = `📏 **Largo Recomendado:** Para la pieza **${NOMBRES[piezaTejida]}** en talla **${nombreTalla}**, el largo recomendado (desde el hombro/cuello al bajo) es de **${largoRecomendado} cm**.`;
+                 document.getElementById('nota-largo').innerHTML = `📏 El largo recomendado para ${NOMBRES[piezaTejida]} en talla ${nombreTalla}, el largo recomendado (desde el hombro al bajo) es de ${largoRecomendado} cm.`;
             }
         } else {
             // Ocultar largo y aviso de tapeta en modo manual
