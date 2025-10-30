@@ -138,16 +138,16 @@
         <select id="tipo-proyecto">
             <option value="jersey">Jersey (Prenda Cerrada)</option>
             <option value="chaqueta">Chaqueta (Prenda Abierta)</option>
-            <option value="manual">Centímetros Deseados (Medida Manual)</option>
+            <option value="manual">cm deseados (Medida Manual)</option>
         </select>
         
-        <div id="selectores-prenda">
+        <div id="selectores-prenda" style="display:none;">
             
             <label for="pieza-tejida">Pieza a tejer:</label>
             <select id="pieza-tejida">
                 <option value="espalda">Espalda</option>
                 <option value="delantero">Delantero</option>
-                <option value="manga">Manga (Empezando por el Puño)</option>
+                <option value="manga">Manga (Puño)</option>
             </select>
 
             <label for="talla">Selecciona la Talla:</label>
@@ -251,12 +251,15 @@
             selectoresPrendaDiv.style.display = 'block';
             manualInputDiv.style.display = 'none';
         }
-        // Ocultar resultados al cambiar el modo
+        // Ocultar resultados al cambiar el modo para forzar un nuevo cálculo
         document.getElementById('resultado').style.display = 'none';
     }
     
     // Inicializar el estado de la interfaz al cargar la página
-    document.addEventListener('DOMContentLoaded', handleTipoProyectoChange);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ejecuta la función de cambio para establecer el estado inicial correcto (Jersey es la opción por defecto)
+        handleTipoProyectoChange(); 
+    });
 
 
     /**
@@ -281,16 +284,16 @@
         
         // 2. Determinar los CM a tejer, pieza y largo
         if (tipoProyecto === 'manual') {
-            // --- MODO MANUAL (Solo CM y Puntos) ---
+            // --- MODO MANUAL ---
             cmDeseados = parseFloat(document.getElementById('cm-deseados').value);
             if (isNaN(cmDeseados) || cmDeseados <= 0) {
-                alert("Por favor, introduce los centímetros deseados.");
+                alert("Por favor, introduce los centímetros deseados para la medida manual.");
                 return;
             }
             piezaTejida = 'Centímetros Deseados';
             
         } else {
-            // --- MODO PRENDA DEFINIDA (Chaqueta/Jersey) ---
+            // --- MODO PRENDA DEFINIDA ---
             const talla = document.getElementById('talla').value;
             piezaTejida = document.getElementById('pieza-tejida').value;
             const datosTalla = TALLAS_BD[talla];
@@ -351,4 +354,20 @@
 
             // Ajuste de texto según la pieza
             if (piezaTejida === 'manga') {
-                document.getElementById('nota-largo').innerHTML = `📏 **Largo Recomendado:**
+                document.getElementById('nota-largo').innerHTML = `📏 **Largo Recomendado:** Para la pieza **Manga** en talla **${nombreTalla}**, el largo recomendado a tejer (desde el puño hasta la sisa) es de **${largoRecomendado} cm**.`;
+            } else {
+                 document.getElementById('nota-largo').innerHTML = `📏 **Largo Recomendado:** Para la pieza **${NOMBRES[piezaTejida]}** en talla **${nombreTalla}**, el largo recomendado (desde el hombro/cuello al bajo) es de **${largoRecomendado} cm**.`;
+            }
+        } else {
+            // Ocultar largo y aviso de tapeta en modo manual
+            notaLargo.style.display = 'none';
+            avisoTapeta.style.display = 'none';
+        }
+
+        // Desplazarse al resultado
+        document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
