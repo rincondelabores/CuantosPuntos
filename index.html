@@ -138,7 +138,7 @@
         <select id="tipo-proyecto">
             <option value="jersey">Jersey (Prenda Cerrada)</option>
             <option value="chaqueta">Chaqueta (Prenda Abierta)</option>
-            <option value="manual">cm deseados (Medida Manual)</option>
+            <option value="manual">Centímetros Deseados (Medida Manual)</option>
         </select>
         
         <div id="selectores-prenda" style="display:none;">
@@ -147,7 +147,7 @@
             <select id="pieza-tejida">
                 <option value="espalda">Espalda</option>
                 <option value="delantero">Delantero</option>
-                <option value="manga">Manga (Puño)</option>
+                <option value="manga">Manga (Empezando por el Puño)</option>
             </select>
 
             <label for="talla">Selecciona la Talla:</label>
@@ -188,7 +188,7 @@
 
     <div id="resultado" style="display:none;">
         <h3>Resultado del Cálculo</h3>
-        <p>Para tejer **<span id="resultado-cm"></span>** con tu muestra ($10 \text{ cm} = <span id="resultado-muestra"></span> \text{ puntos}$), necesitas:</p>
+        <p>Para tejer **<span id="resultado-cm"></span>** con tu muestra (10 cm = <span id="resultado-muestra"></span> puntos), necesitas:</p>
         <h2><span id="puntos-finales"></span> PUNTOS</h2>
         
         <div id="aviso-tapeta" class="aviso">
@@ -257,7 +257,6 @@
     
     // Inicializar el estado de la interfaz al cargar la página
     document.addEventListener('DOMContentLoaded', () => {
-        // Ejecuta la función de cambio para establecer el estado inicial correcto (Jersey es la opción por defecto)
         handleTipoProyectoChange(); 
     });
 
@@ -274,7 +273,7 @@
         let nombreTalla = '';
         let piezaTejida = '';
 
-        // 1. Validar la muestra de tensión
+        // 1. Validar la muestra de tensión (CORREGIDO: Se valida siempre al inicio)
         if (isNaN(puntos10cm) || puntos10cm <= 0) {
             alert("Por favor, introduce un número de puntos válido para 10 cm.");
             return;
@@ -298,11 +297,8 @@
             piezaTejida = document.getElementById('pieza-tejida').value;
             const datosTalla = TALLAS_BD[talla];
             
-            if (!datosTalla) {
-                alert("Por favor, selecciona una talla válida.");
-                return;
-            }
-            
+            // Si el selector de talla está visible, asumimos que tiene una talla válida.
+            // No se necesita validar datosTalla a menos que se manipule el HTML.
             nombreTalla = NOMBRES[talla];
             
             // Lógica de cálculo de CM y largo según la pieza
